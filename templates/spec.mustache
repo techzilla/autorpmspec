@@ -1,64 +1,105 @@
-%define name {{name}}
-%define version {{version}}
-%define release {{release}}
-%define buildroot %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Summary: {{name}}
-
-Group: Installation Script
+Name: {{name}}
+Version: {{version}}
+Release: {{release}}
+Summary: %{name}
 License: {{license}}
-Source: %{name}.tar.gz
-BuildRoot: %{buildroot}
-Requires: nodejs{{#nodeVersion}} {{{nodeVersion}}}{{/nodeVersion}}
+
+BuildArch: noarch
+Source: %{name}-%{version}.tar.gz
+
+%{?systemd_requires}
+Requires: nodejs
 {{#requires}}
 Requires: {{.}}
 {{/requires}}
-BuildRequires: nodejs{{#nodeVersion}} {{{nodeVersion}}}{{/nodeVersion}}
+BuildRequires: nodejs
 {{#buildRequires}}
 BuildRequires: {{.}}
 {{/buildRequires}}
+
 AutoReqProv: no
+
 
 %description
 {{description}}
 
+%global __os_install_post %{nil}
+%define debug_package %{nil}
+%define username {{username}}
+%define groupname {{groupname}}
+
+
+
+
 %prep
-%setup -q -c -n %{name}
+%setup -q -c
 
 %build
-{{#prune}}
 npm prune --production
-{{/prune}}
 npm rebuild
 
-%pre
-getent group {{username}} >/dev/null || groupadd -r {{username}}
-getent passwd {{username}} >/dev/null || useradd -r -g {{username}} -G {{username}} -d / -s /sbin/nologin -c "{{username}}" {{username}}
-
 %install
-mkdir -p %{buildroot}/usr/lib/{{name}}
-cp -r ./* %{buildroot}/usr/lib/{{name}}
-mkdir -p %{buildroot}/var/log/{{name}}
+mkdir -p %{buildroot}/var/www/%{name}
+cp -r ./* %{buildroot}/var/www/%{name}
+mkdir -p %{buildroot}/var/log/%{name}
+
+%pre
+getent group %{groupname} >/dev/null || {
+    groupadd -r %{groupname}
+}
+getent passwd %{username} >/dev/null || {
+    useradd -r -g %{groupname} -d /var/lib/%{name} -s /sbin/nologin -c "%{name} service" %{username}
+}
+
+cat << EOF > %{buildroot}%{_unitdir}/%{name}.service
+[Unit]
+Description=%{name}
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/var/www/%{name}
+Restart=always
+RestartSec=3
+User=%{username}
+Group=%{groupname}
+
+{{#environment}}
+Environment={{key}}={{value}}
+{{/environment}}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat << EOF > %{buildroot}/lib/systemd/system-preset/50-%{name}.preset
+enable %{name}.service
+EOF
+
 
 %post
-systemctl enable /usr/lib/{{name}}/{{name}}.service
+%systemd_post %{name}.service
 {{#postInstallCommands}}
 {{.}}
 {{/postInstallCommands}}
 
-%clean
-rm -rf %{buildroot}
+%preun
+%systemd_preun %{name}.service
+{{#preunInstallCommands}}
+{{.}}
+{{/preunInstallCommands}}
+
+%postun
+%systemd_postun_with_restart %{name}.service
+{{#postunInstallCommands}}
+{{.}}
+{{/postunInstallCommands}}
+
 
 %files
-%defattr(644, {{username}}, {{username}}, 755)
-/usr/lib/{{name}}
-/var/log/{{name}}
-{{#hasExecutableFiles}}
-%defattr(755, {{username}}, {{username}}, 755)
-{{#executableFiles}}
-{{.}}
-{{/executableFiles}}
-{{/hasExecutableFiles}}
+%defattr(644, %{username}, %{groupname}, 755)
+/var/www/%{name}
+/var/log/%{name}
+
+%attr(644,root,root) %{_unitdir}/%{name}.service
+%attr(644,root,root) /lib/systemd/system-preset/50-%{name}.preset
