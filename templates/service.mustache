@@ -1,0 +1,20 @@
+[Unit]
+Description={{description}}
+After=network.target nss-lookup.target
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/usr/lib/{{name}}
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{name}}
+User={{username}}
+Group={{username}}
+
+{{#environment}}
+Environment={{key}}={{value}}
+{{/environment}}
+
+[Install]
+WantedBy=multi-user.target

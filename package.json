@@ -1,0 +1,27 @@
+{
+  "name": "autorpmspec",
+  "version": "1.0.0",
+  "description": "Auto-Generate RPM Spec",
+  "main": "index.js",
+  "scripts": {
+    "fix": "standard --fix",
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@dev-gitinf01.amtrustservices.com:InfrastructurePackaged/autorpmspec.git"
+  },
+  "keywords": [
+    "rpm"
+  ],
+  "author": "J. M. Becker",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "standard": "^8.6.0"
+  },
+  "dependencies": {
+    "commander": "^2.9.0",
+    "hogan.js": "^3.0.2",
+    "rimraf": "^2.5.4"
+  }
+}
