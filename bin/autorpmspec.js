@@ -2,6 +2,7 @@
 
 var path = require('path')
 var program = require('commander')
+var mixinDeep = require('mixin-deep')
 
 var commandPkg = require('../package')
 var prepare = require('../lib/prepare')
@@ -19,19 +20,30 @@ try {
 
 program
   .version(commandPkg.version)
+  .description('Generate an RPM Spec from a NodeJS package')
   .option('-o, --output <value>', 'Set output directory', 'build')
-  .option('-r --release <value>', 'Set release number', /^(\d+)$/, '1')
-//  .option('-n --name <name>', 'Set package name')
+  .option('-r, --release <value>', 'Set release number', /^(\d+)$/, '1')
+  .option('-n, --name <name>', 'Set package name', projectPkg.name)
   .parse(process.argv)
 
-// var name = program.name instanceof Function ? undefined : program.name
 var buildDir = path.resolve(workingDir, program.output)
 
+var processPkg = {
+  'name': program.name,
+  'release': program.release
+}
+
+var basePkg = {
+  'licence': 'UNLICENSED',
+  'spec': {
+    'username': projectPkg.name,
+    'groupname': projectPkg.name
+  }
+}
+
+var specPkg = mixinDeep(basePkg, projectPkg, processPkg)
+
 prepare(buildDir)
-
-archive(workingDir, buildDir, projectPkg)
-
-batch(buildDir, projectPkg)
-
-// console.log(JSON.stringify(projectPkg, null, 2))
+archive(workingDir, buildDir, specPkg)
+batch(buildDir, specPkg)
 

@@ -1,28 +1,40 @@
 {
   "name": "autorpmspec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Auto-Generate RPM Spec",
   "main": "index.js",
-  "scripts": {
-    "fix": "standard --fix",
-    "test": "standard"
+  "author": "J. M. Becker",
+  "license": "Apache-2.0",
+  "keywords": [
+    "rpm",
+    "spec",
+    "rpmspec",
+    "generate"
+  ],
+  "publishConfig": {
+    "registry": "https://cleprepobin01.serv.infr.it.amtrustna.com/repository/npm-ci/"
   },
   "repository": {
     "type": "git",
-    "url": "git@dev-gitinf01.amtrustservices.com:InfrastructurePackaged/autorpmspec.git"
+    "url": "https://dev-gitinf01.amtrustservices.com/InfrastructurePackaged/autorpmspec.git"
   },
-  "keywords": [
-    "rpm"
-  ],
-  "author": "J. M. Becker",
-  "license": "Apache-2.0",
+  "bugs": "https://dev-gitinf01.amtrustservices.com/InfrastructurePackaged/autorpmspec/issues",
   "devDependencies": {
     "standard": "^8.6.0"
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "hogan.js": "^3.0.2",
+    "handlebars": "^4.0.6",
+    "mixin-deep": "^1.1.3",
     "mkdirp": "^0.5.1",
     "tar-fs": "^1.15.0"
+  },
+   "bin": {
+    "autorpmspec": "./bin/autorpmspec.js"
+    },
+  "scripts": {
+    "fix": "standard --fix",
+    "test": "standard",
+    "build": "npm test && npm publish"
   }
 }

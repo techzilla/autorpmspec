@@ -9,26 +9,23 @@ Source: %{name}-%{version}.tar.gz
 
 %{?systemd_requires}
 Requires: nodejs
-{{#requires}}
+{{#spec.requires}}
 Requires: {{.}}
-{{/requires}}
+{{/spec.requires}}
 BuildRequires: nodejs
-{{#buildRequires}}
+{{#spec.buildRequires}}
 BuildRequires: {{.}}
-{{/buildRequires}}
+{{/spec.buildRequires}}
 
 AutoReqProv: no
 
+%global __os_install_post %{nil}
+%define debug_package %{nil}
+%define username {{spec.username}}
+%define groupname {{spec.groupname}}
 
 %description
 {{description}}
-
-%global __os_install_post %{nil}
-%define debug_package %{nil}
-%define username {{username}}
-%define groupname {{groupname}}
-
-
 
 
 %prep
@@ -38,18 +35,16 @@ AutoReqProv: no
 npm prune --production
 npm rebuild
 
+
 %install
 mkdir -p %{buildroot}/var/www/%{name}
-cp -r ./* %{buildroot}/var/www/%{name}
 mkdir -p %{buildroot}/var/log/%{name}
 
-%pre
-getent group %{groupname} >/dev/null || {
-    groupadd -r %{groupname}
-}
-getent passwd %{username} >/dev/null || {
-    useradd -r -g %{groupname} -d /var/lib/%{name} -s /sbin/nologin -c "%{name} service" %{username}
-}
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}/lib/systemd/system-preset
+
+cp -r ./* %{buildroot}/var/www/%{name}
+
 
 cat << EOF > %{buildroot}%{_unitdir}/%{name}.service
 [Unit]
@@ -64,9 +59,9 @@ RestartSec=3
 User=%{username}
 Group=%{groupname}
 
-{{#environment}}
-Environment={{key}}={{value}}
-{{/environment}}
+{{#each spec.environment}}
+Environment={{@key}}={{this}}
+{{/each}}
 
 [Install]
 WantedBy=multi-user.target
@@ -77,23 +72,34 @@ enable %{name}.service
 EOF
 
 
+%pre
+getent group %{groupname} >/dev/null || {
+    groupadd -r %{groupname}
+}
+getent passwd %{username} >/dev/null || {
+    useradd -r -g %{groupname} -d /var/www/%{name} -m -s /sbin/nologin -c "%{name} service" %{username}
+}
+{{#spec.pre}}
+{{{.}}}
+{{/spec.pre}}
+
 %post
 %systemd_post %{name}.service
-{{#postInstallCommands}}
-{{.}}
-{{/postInstallCommands}}
+{{#spec.post}}
+{{{.}}}
+{{/spec.post}}
 
 %preun
 %systemd_preun %{name}.service
-{{#preunInstallCommands}}
-{{.}}
-{{/preunInstallCommands}}
+{{#spec.preun}}
+{{{.}}}
+{{/spec.preun}}
 
 %postun
 %systemd_postun_with_restart %{name}.service
-{{#postunInstallCommands}}
-{{.}}
-{{/postunInstallCommands}}
+{{#spec.postun}}
+{{{.}}}
+{{/spec.postun}}
 
 
 %files
@@ -103,3 +109,8 @@ EOF
 
 %attr(644,root,root) %{_unitdir}/%{name}.service
 %attr(644,root,root) /lib/systemd/system-preset/50-%{name}.preset
+
+{{#spec.executable}}
+%defattr(755, %{username}, %{groupname}, 755)
+{{.}}
+{{/spec.executable}}
