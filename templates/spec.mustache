@@ -77,7 +77,7 @@ getent group %{groupname} >/dev/null || {
     groupadd -r %{groupname}
 }
 getent passwd %{username} >/dev/null || {
-    useradd -r -g %{groupname} -d /var/www/%{name} -m -s /sbin/nologin -c "%{name} service" %{username}
+    useradd -r -g %{groupname} -d /var/www/%{name} -s /sbin/nologin -c "%{name} service" %{username}
 }
 {{#spec.pre}}
 {{{.}}}
@@ -85,6 +85,9 @@ getent passwd %{username} >/dev/null || {
 
 %post
 %systemd_post %{name}.service
+[ "$1" -eq 1 ] && {
+    systemctl start %{name}.service
+}
 {{#spec.post}}
 {{{.}}}
 {{/spec.post}}
