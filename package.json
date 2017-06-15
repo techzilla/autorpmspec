@@ -11,14 +11,11 @@
     "rpmspec",
     "generate"
   ],
-  "publishConfig": {
-    "registry": "https://cleprepobin01.serv.infr.it.amtrustna.com/repository/npm-ci/"
-  },
   "repository": {
     "type": "git",
-    "url": "https://dev-gitinf01.amtrustservices.com/InfrastructurePackaged/autorpmspec.git"
+    "url": "https://github.com/techzilla/autorpmspec.git"
   },
-  "bugs": "https://dev-gitinf01.amtrustservices.com/InfrastructurePackaged/autorpmspec/issues",
+  "bugs": "https://github.com/techzilla/autorpmspec/issues",
   "devDependencies": {
     "standard": "^8.6.0"
   },
