@@ -43,8 +43,7 @@ mkdir -p %{buildroot}/var/log/%{name}
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}/lib/systemd/system-preset
 
-cp -r ./* %{buildroot}/var/www/%{name}
-
+cp -a . %{buildroot}/var/www/%{name}
 
 cat << EOF > %{buildroot}%{_unitdir}/%{name}.service
 [Unit]
