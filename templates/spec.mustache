@@ -1,8 +1,8 @@
-Name: {{name}}
-Version: {{version}}
-Release: {{release}}
+Name: {{{name}}}
+Version: {{{version}}}
+Release: {{{release}}}
 Summary: %{name}
-License: {{license}}
+License: {{{license}}}
 
 BuildArch: noarch
 Source: %{name}-%{version}.tar.gz
@@ -10,22 +10,22 @@ Source: %{name}-%{version}.tar.gz
 %{?systemd_requires}
 Requires: nodejs
 {{#spec.requires}}
-Requires: {{.}}
+Requires: {{{.}}}
 {{/spec.requires}}
 BuildRequires: nodejs
 {{#spec.buildRequires}}
-BuildRequires: {{.}}
+BuildRequires: {{{.}}}
 {{/spec.buildRequires}}
 
 AutoReqProv: no
 
 %global __os_install_post %{nil}
 %define debug_package %{nil}
-%define username {{spec.username}}
-%define groupname {{spec.groupname}}
+%define username {{{spec.username}}}
+%define groupname {{{spec.groupname}}}
 
 %description
-{{description}}
+{{{description}}}
 
 
 %prep
@@ -60,7 +60,7 @@ User=%{username}
 Group=%{groupname}
 
 {{#each spec.environment}}
-Environment={{@key}}={{this}}
+Environment={{{@key}}}={{{this}}}
 {{/each}}
 
 [Install]
@@ -115,5 +115,5 @@ getent passwd %{username} >/dev/null || {
 
 {{#spec.executable}}
 %defattr(755, %{username}, %{groupname}, 755)
-{{.}}
+{{{.}}}
 {{/spec.executable}}
